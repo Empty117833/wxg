@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>首页</title>
+    <!--1.微信要求引入的文件，提供调用硬件的功能！ -->
+    <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <style>
+    #box {
+        text-align: center;
+    }
+    
+    #box img {
+        width: 80%;
+    }
+    </style>
+    <!-- 如果要使用摇一摇，则再额外引用该文件 -->
+    <!-- <script src="http://res.wx.qq.com/open/js/jweixin-1.1.0.js"></script> -->
+</head>
+
+<body>
+    我是中国人，我爱自己的祖国!!
+    <br>
+    <h3>点击下方选择照片</h3>
+    <div id="box">
+        <img id="s_img" src="https://ss2.baidu.com/6ONYsjip0QIZ8tyhnq/it/u=1936165628,2161797022&fm=58" alt="">
+    </div>
+    <script src=""></script>
+    <script>
+    // 0.发ajax得到相关数据
+    var xhr = new XMLHttpRequest()
+    xhr.open('GET', 'http://wechat.huoqishi.net/wechat/ticket')
+    xhr.onreadystatechange = function(res) {
+        console.log(res.readyState)
+        console.log(res.status)
+        if (res.target.readyState == 4) {
+            if (res.target.status == 200) {
+                // ------------------- 请求成功!
+                var info = JSON.parse(res.target.responseText)
+                console.log(info)
+                wx.config({
+                    debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+                    appId: info.appid, // 必填，公众号的唯一标识
+                    timestamp: info.timestamp, // 必填，生成签名的时间戳
+                    nonceStr: info.nonceStr, // 必填，生成签名的随机串
+                    signature: info.signature, // 必填，签名，见附录1
+                    jsApiList: ['chooseImage', 'previewImage'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+                })
+            } else {
+                alert("error");
+            }
+        }
+    }
+    xhr.send()
+
+    wx.ready(function() {
+        console.log('成功！')
+            // config信息验证后会执行ready方法，所有接口调用都必须在config接口获得结果之后，config是一个客户端的异步操作，所以如果需要在页面加载时就调用相关接口，则须把相关接口放在ready函数中调用来确保正确执行。对于用户触发时才调用的接口，则可以直接调用，不需要放在ready函数中。
+
+        //拍照或从手机相册中选图接口
+        wx.chooseImage({
+            count: 1, // 默认9
+            sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+            sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+            success: function(res) {
+                var localIds = res.localIds; // 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
+                var oImg = document.getElementById('s_img')
+                oImg.src = localIds
+
+                // // 上传图片
+                // wx.uploadImage({
+                //     localId: '', // 需要上传的图片的本地ID，由chooseImage接口获得
+                //     isShowProgressTips: 1, // 默认为1，显示进度提示
+                //     success: function(res) {
+                //         var serverId = res.serverId; // 返回图片的服务器端ID
+                //     }
+                // })
+            }
+        });
+    })
+
+    // 错误时执行
+    wx.error(function(res) {
+        // config信息验证失败会执行error函数，如签名过期导致验证失败，具体错误信息可以打开config的debug模式查看，也可以在返回的res参数中查看，对于SPA可以在这里更新签名。
+    })
+    </script>
+    <script>
+    var oImg = document.getElementById('s_img')
+    oImg.onclick = function() {
+        alert('选择照片')
+            //拍照或从手机相册中选图接口
+        wx.chooseImage({
+            count: 1, // 默认9
+            sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+            sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+            success: function(res) {
+                var localIds = res.localIds; // 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
+                var oImg = document.getElementById('s_img')
+                oImg.src = localIds
+
+                // // 上传图片
+                // wx.uploadImage({
+                //     localId: '', // 需要上传的图片的本地ID，由chooseImage接口获得
+                //     isShowProgressTips: 1, // 默认为1，显示进度提示
+                //     success: function(res) {
+                //         var serverId = res.serverId; // 返回图片的服务器端ID
+                //     }
+                // })
+            }
+        });
+    }
+    </script>
+</body>
+
+</html>
